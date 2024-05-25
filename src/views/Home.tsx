@@ -1,15 +1,9 @@
 import PeopleList from "../components/PeopleList";
-
-import React from "react";
-import {
-  UserOutlined,
-  EyeOutlined,
-  RedditOutlined,
-  PlaySquareOutlined,
-} from "@ant-design/icons";
-import type { MenuProps } from "antd";
+import { useQuery, gql } from "@apollo/client";
 import { Layout, Menu, theme } from "antd";
 import Filters from "../components/Filters";
+import { useEffect, useState } from "react";
+import { FilterConditions, Node } from "../type";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -17,6 +11,98 @@ function Home() {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+
+  const [filterConditions, setFilterConditions] = useState<FilterConditions>({
+    gender: "",
+    film: "",
+    eyeColor: [],
+    species: [],
+  });
+
+  // fetch data from SWAPI
+  const PEOPLE_QUERY = gql`
+    query GetData($cursor: String, $before: String) {
+      allPeople(first: 10, after: $cursor, before: $before) {
+        edges {
+          node {
+            id
+            name
+            height
+            homeworld {
+              name
+            }
+            species {
+              name
+            }
+            gender
+            eyeColor
+            filmConnection {
+              films {
+                title
+              }
+            }
+          }
+          cursor
+        }
+        pageInfo {
+          startCursor
+          endCursor
+          hasNextPage
+          hasPreviousPage
+        }
+      }
+    }
+  `;
+
+  // first data fetch
+  const { data, fetchMore, loading, error } = useQuery(PEOPLE_QUERY, {
+    variables: { cursor: null, before: null },
+  });
+
+  useEffect(() => {
+    // clear all conditions if data change
+    setFilterConditions({
+      gender: "",
+      film: "",
+      eyeColor: [],
+      species: [],
+    });
+  }, [data]);
+
+  const [filteredData, setFilteredData] = useState(data);
+  useEffect(() => {
+    if (data) {
+      console.log(filterConditions.gender);
+      const filtered = data.allPeople.edges.filter(
+        ({ node }: { node: Node }) =>
+          (!filterConditions.gender ||
+            node.gender === filterConditions.gender) &&
+          (!filterConditions.film ||
+            node.filmConnection.films.some(
+              (film) => film.title === filterConditions.film
+            )) &&
+          (filterConditions.eyeColor.length === 0 ||
+            filterConditions.eyeColor.includes(node.eyeColor)) &&
+          (filterConditions.species.length === 0 ||
+            node.species.some((species) =>
+              filterConditions.species.includes(species.name)
+            ))
+      );
+
+      console.log(filtered);
+
+      setFilteredData({
+        allPeople: {
+          edges: filtered,
+          pageInfo: data.allPeople.pageInfo,
+        },
+      });
+    }
+  }, [data, filterConditions]);
+
+  if (!filteredData) {
+    return <p>Loading...</p>;
+  }
 
   return (
     <Layout style={{ width: "100%", minHeight: "100vh" }}>
@@ -33,10 +119,20 @@ function Home() {
           }}
         >
           <Sider style={{ background: colorBgContainer }} width={200}>
-            <Filters />
+            <Filters
+              data={data}
+              loading={loading}
+              error={error}
+              setFilterConditions={setFilterConditions}
+            />
           </Sider>
           <Content style={{ padding: "0 24px", minHeight: 280 }}>
-            <PeopleList />
+            <PeopleList
+              data={filteredData}
+              fetchMore={fetchMore}
+              loading={loading}
+              error={error}
+            />
           </Content>
         </Layout>
       </Content>

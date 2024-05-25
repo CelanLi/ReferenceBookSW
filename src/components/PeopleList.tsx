@@ -1,53 +1,18 @@
-import { useQuery, gql, useApolloClient } from "@apollo/client";
-
 import { List, Divider, Button } from "antd";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 
 import { useState } from "react";
 
-function PeopleList() {
+interface PeopleListProps {
+  data: any;
+  fetchMore: any;
+  loading: boolean;
+  error: any;
+}
+
+function PeopleList({ data, fetchMore, loading, error }: PeopleListProps) {
   const [pageCursors, setPageCursors] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
-
-  // fetch data from SWAPI
-  const PEOPLE_QUERY = gql`
-    query GetData($cursor: String, $before: String) {
-      allPeople(first: 10, after: $cursor, before: $before) {
-        edges {
-          node {
-            id
-            name
-            height
-            homeworld {
-              name
-            }
-            species {
-              name
-            }
-            gender
-            hairColor
-            filmConnection {
-              films {
-                title
-              }
-            }
-          }
-          cursor
-        }
-        pageInfo {
-          startCursor
-          endCursor
-          hasNextPage
-          hasPreviousPage
-        }
-      }
-    }
-  `;
-
-  // deal with fetched data
-  const { data, fetchMore, loading, error } = useQuery(PEOPLE_QUERY, {
-    variables: { cursor: null, before: null },
-  });
 
   // render data
   if (loading) {
@@ -55,7 +20,7 @@ function PeopleList() {
   }
   if (error) return <p>Error: {error.message}</p>;
 
-  // fetch more data when curser changes
+  // fetch forward when curser changes
   const onForward = () => {
     setCurrentPage(currentPage + 1);
     setPageCursors([...pageCursors, data.allPeople.pageInfo.endCursor]);
@@ -64,10 +29,10 @@ function PeopleList() {
         cursor: data.allPeople.pageInfo.endCursor,
         limit: 10,
       },
-    }).then((newData) => {});
+    });
   };
 
-  // fetch more data when curser changes
+  // fetch backward when curser changes
   const onBackward = () => {
     if (currentPage > 0) {
       const newCurrentPage = currentPage - 1;
@@ -96,7 +61,7 @@ function PeopleList() {
         <p>Homeworld</p>
         <p>Species</p>
         <p>Gender</p>
-        <p>Hair Color</p>
+        <p>Eye Color</p>
         <p>Films</p>
       </div>
       <Divider style={{ borderWidth: 2 }} />
@@ -114,6 +79,7 @@ function PeopleList() {
                       gridTemplateColumns: "repeat(6, 1fr) 2fr",
                       gap: "10px",
                       justifyItems: "center",
+                      alignItems: "center",
                     }}
                   >
                     <p>{edges.node.name || "-"}</p>
@@ -126,10 +92,10 @@ function PeopleList() {
                       {(edges.node.species && edges.node.species.name) || "-"}
                     </p>
                     <p>{edges.node.gender || "-"}</p>
-                    <p>{edges.node.hairColor || "-"}</p>
+                    <p>{edges.node.eyeColor || "-"}</p>
                     <p>
                       {edges.node.filmConnection.films.map((film: any) => (
-                        <div key={film.title}>- {film.title}</div>
+                        <p key={film.title}>- {film.title}</p>
                       ))}
                     </p>
                   </div>
