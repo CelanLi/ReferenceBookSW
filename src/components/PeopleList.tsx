@@ -1,5 +1,6 @@
 import { List, Divider, Button } from "antd";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import { Link } from "react-router-dom";
 
 import { useState } from "react";
 
@@ -82,7 +83,14 @@ function PeopleList({ data, fetchMore, loading, error }: PeopleListProps) {
                       alignItems: "center",
                     }}
                   >
-                    <p>{edges.node.name || "-"}</p>
+                    <Link
+                      to={{
+                        pathname: `/people/${edges.node.id}`,
+                        search: location.search,
+                      }}
+                    >
+                      <p>{edges.node.name || "-"}</p>
+                    </Link>
                     <p>{edges.node.height || "-"}</p>
                     <p>
                       {(edges.node.homeworld && edges.node.homeworld.name) ||

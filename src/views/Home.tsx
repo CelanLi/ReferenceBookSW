@@ -3,6 +3,7 @@ import { useQuery, gql } from "@apollo/client";
 import { Layout, Menu, theme } from "antd";
 import Filters from "../components/Filters";
 import { useEffect, useState } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { FilterConditions, Node } from "../type";
 
 const { Header, Content, Footer, Sider } = Layout;
@@ -12,12 +13,46 @@ function Home() {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
+  const location = useLocation();
+  // const filters = location.state?.searchParams || "";
+
+  const [searchParams] = useSearchParams();
+
+  const initialGender = searchParams.get("gender") || "";
+  const initialFilm = searchParams.get("film") || "";
+  const initialSpecies = searchParams.get("species")
+    ? searchParams.get("species")!.split(",")
+    : [];
+  const initialEyeColor = searchParams.get("eyeColor")
+    ? searchParams.get("eyeColor")!.split(",")
+    : [];
+
+  // const [filterConditions, setFilterConditions] = useState<FilterConditions>({
+  //   gender: "",
+  //   film: "",
+  //   eyeColor: [],
+  //   species: [],
+  // });
   const [filterConditions, setFilterConditions] = useState<FilterConditions>({
-    gender: "",
-    film: "",
-    eyeColor: [],
-    species: [],
+    gender: initialGender,
+    film: initialFilm,
+    eyeColor: initialEyeColor,
+    species: initialSpecies,
   });
+
+  // if searchParams change, update filterConditions
+  useEffect(() => {
+    setFilterConditions({
+      gender: searchParams.get("gender") || "",
+      film: searchParams.get("film") || "",
+      eyeColor: searchParams.get("eyeColor")
+        ? searchParams.get("eyeColor")!.split(",")
+        : [],
+      species: searchParams.get("species")
+        ? searchParams.get("species")!.split(",")
+        : [],
+    });
+  }, [searchParams]);
 
   // fetch data from SWAPI
   const PEOPLE_QUERY = gql`
@@ -73,6 +108,7 @@ function Home() {
   useEffect(() => {
     if (data) {
       console.log(filterConditions.gender);
+      console.log("species", data.allPeople.edges[0].node.species);
       const filtered = data.allPeople.edges.filter(
         ({ node }: { node: Node }) =>
           (!filterConditions.gender ||
@@ -84,9 +120,7 @@ function Home() {
           (filterConditions.eyeColor.length === 0 ||
             filterConditions.eyeColor.includes(node.eyeColor)) &&
           (filterConditions.species.length === 0 ||
-            node.species.some((species) =>
-              filterConditions.species.includes(species.name)
-            ))
+            filterConditions.species.includes(node.species?.name))
       );
 
       console.log(filtered);

@@ -7,6 +7,7 @@ import {
   useQuery,
   gql,
 } from "@apollo/client";
+import AppRoutes from "./Routes";
 
 const cache = new InMemoryCache({
   typePolicies: {
@@ -96,7 +97,7 @@ function App() {
   return (
     <ApolloProvider client={client}>
       <div style={{ width: "100%" }}>
-        <Home></Home>
+        <AppRoutes />
       </div>
     </ApolloProvider>
   );

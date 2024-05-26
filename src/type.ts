@@ -19,7 +19,7 @@ export type Homeworld = {
     name: string;
     height: number;
     homeworld: Homeworld;
-    species: Species[];
+    species: Species;
     gender: string;
     eyeColor: string;
     filmConnection: FilmConnection;

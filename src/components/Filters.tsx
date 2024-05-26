@@ -7,6 +7,7 @@ import {
 } from "@ant-design/icons";
 import { Radio, Checkbox, List, Button } from "antd";
 import { FilterConditions } from "../type.ts";
+import { useSearchParams } from "react-router-dom";
 
 interface FilterProps {
   data: any;
@@ -15,12 +16,27 @@ interface FilterProps {
   setFilterConditions: React.Dispatch<React.SetStateAction<FilterConditions>>;
 }
 
-function Filters({ data, loading, error, setFilterConditions }: FilterProps) {
+function Filters({ data, loading, error }: FilterProps) {
   // set up states
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedGender, setSelectedGender] = useState("");
   const [selectedFilm, setSelectedFilm] = useState("");
   const [selectedSpecies, setSelectedSpecies] = useState<string[]>([]);
   const [selectedEyeColor, setSelectedEyeColor] = useState<string[]>([]);
+
+  // Function to update the filters
+  const updateFilters = () => {
+    setSearchParams({
+      gender: selectedGender,
+      film: selectedFilm,
+      species: selectedSpecies.join(","),
+      eyeColor: selectedEyeColor.join(","),
+    });
+  };
+
+  useEffect(() => {
+    updateFilters();
+  }, [selectedGender, selectedFilm, selectedSpecies, selectedEyeColor]);
 
   // render data
   if (loading) {
@@ -130,31 +146,31 @@ function Filters({ data, loading, error, setFilterConditions }: FilterProps) {
   };
 
   // apply and clear filters
-  const applyFilters = () => {
-    setFilterConditions({
-      gender: selectedGender,
-      film: selectedFilm,
-      eyeColor: selectedEyeColor,
-      species: selectedSpecies,
-    });
-  };
+  // const applyFilters = () => {
+  //   setFilterConditions({
+  //     gender: selectedGender,
+  //     film: selectedFilm,
+  //     eyeColor: selectedEyeColor,
+  //     species: selectedSpecies,
+  //   });
+  // };
 
   const clearFilters = () => {
     setSelectedGender("");
     setSelectedFilm("");
     setSelectedEyeColor([]);
     setSelectedSpecies([]);
-    setFilterConditions({ gender: "", film: "", eyeColor: [], species: [] });
+    // setFilterConditions({ gender: "", film: "", eyeColor: [], species: [] });
   };
 
   return (
     <>
-      <Button type="primary" onClick={applyFilters}>
+      {/* <Button type="primary" onClick={applyFilters}>
         Apply Filters
-      </Button>
-      <Button type="primary" onClick={clearFilters}>
+      </Button> */}
+      {/* <Button type="primary" onClick={clearFilters}>
         Clear All Filters
-      </Button>
+      </Button> */}
       <List
         style={{ width: "100%", padding: "10px" }}
         dataSource={filters}
@@ -174,22 +190,34 @@ function Filters({ data, loading, error, setFilterConditions }: FilterProps) {
                       value={selectedGender}
                       onChange={handleGenderChange}
                     >
-                      {filter.children.map((child) => (
-                        <div key={child.key} style={{ marginBottom: "10px" }}>
-                          <Radio value={child.key}>{child.label}</Radio>
-                        </div>
-                      ))}
+                      {filter.children.map(
+                        (child) =>
+                          child.key !== "Others" && (
+                            <div
+                              key={child.key}
+                              style={{ marginBottom: "10px" }}
+                            >
+                              <Radio value={child.key}>{child.label}</Radio>
+                            </div>
+                          )
+                      )}
                     </Radio.Group>
                   ) : (
                     <Radio.Group
                       value={selectedFilm}
                       onChange={handleFilmChange}
                     >
-                      {filter.children.map((child) => (
-                        <div key={child.key} style={{ marginBottom: "10px" }}>
-                          <Radio value={child.key}>{child.label}</Radio>
-                        </div>
-                      ))}
+                      {filter.children.map(
+                        (child) =>
+                          child.key !== "Others" && (
+                            <div
+                              key={child.key}
+                              style={{ marginBottom: "10px" }}
+                            >
+                              <Radio value={child.key}>{child.label}</Radio>
+                            </div>
+                          )
+                      )}
                     </Radio.Group>
                   )
                 ) : filter.type === "checkbox" ? (
@@ -198,22 +226,38 @@ function Filters({ data, loading, error, setFilterConditions }: FilterProps) {
                       onChange={handleEyeColorChange}
                       value={selectedEyeColor}
                     >
-                      {filter.children.map((child) => (
-                        <div key={child.key} style={{ marginBottom: "10px" }}>
-                          <Checkbox value={child.key}>{child.label}</Checkbox>
-                        </div>
-                      ))}
+                      {filter.children.map(
+                        (child) =>
+                          child.key !== "Others" && (
+                            <div
+                              key={child.key}
+                              style={{ marginBottom: "10px" }}
+                            >
+                              <Checkbox value={child.key}>
+                                {child.label}
+                              </Checkbox>
+                            </div>
+                          )
+                      )}
                     </Checkbox.Group>
                   ) : (
                     <Checkbox.Group
                       onChange={handleSpeciesChange}
                       value={selectedSpecies}
                     >
-                      {filter.children.map((child) => (
-                        <div key={child.key} style={{ marginBottom: "10px" }}>
-                          <Checkbox value={child.key}>{child.label}</Checkbox>
-                        </div>
-                      ))}
+                      {filter.children.map(
+                        (child) =>
+                          child.key !== "Others" && (
+                            <div
+                              key={child.key}
+                              style={{ marginBottom: "10px" }}
+                            >
+                              <Checkbox value={child.key}>
+                                {child.label}
+                              </Checkbox>
+                            </div>
+                          )
+                      )}
                     </Checkbox.Group>
                   )
                 ) : null
