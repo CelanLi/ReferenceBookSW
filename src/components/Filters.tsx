@@ -114,16 +114,6 @@ function Filters({ data, loading, error }: FilterProps) {
     setSelectedSpecies(checkedValues);
   };
 
-  // apply and clear filters
-  // const applyFilters = () => {
-  //   setFilterConditions({
-  //     gender: selectedGender,
-  //     film: selectedFilm,
-  //     eyeColor: selectedEyeColor,
-  //     species: selectedSpecies,
-  //   });
-  // };
-
   const clearFilters = () => {
     setSelectedGender("");
     setSelectedEyeColor([]);
@@ -133,9 +123,6 @@ function Filters({ data, loading, error }: FilterProps) {
 
   return (
     <>
-      {/* <Button type="primary" onClick={applyFilters}>
-        Apply Filters
-      </Button> */}
       <Button type="primary" onClick={clearFilters}>
         Clear All Filters
       </Button>

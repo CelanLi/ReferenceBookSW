@@ -11,9 +11,12 @@ function DetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
+  if (!id) {
+    return <p>Missing ID parameter in the URL.</p>;
+  }
   // fetch people by id
   const { data, loading, error } = useQuery(GET_PERSON, {
-    variables: { id },
+    variables: { id: id },
   });
 
   if (loading) return <p>Loading...</p>;
@@ -36,25 +39,25 @@ function DetailPage() {
           </Button>
           <Descriptions title="Person Info" bordered>
             <Descriptions.Item label="Name">
-              {data.person.name || "-"}
+              {data?.person?.name || "-"}
             </Descriptions.Item>
             <Descriptions.Item label="Height">
-              {data.person.height || "-"}
+              {data?.person?.height || "-"}
             </Descriptions.Item>
             <Descriptions.Item label="Gender">
-              {data.person.gender || "-"}
+              {data?.person?.gender || "-"}
             </Descriptions.Item>
             <Descriptions.Item label="Eye Color">
-              {data.person.eyeColor || "-"}
+              {data?.person?.eyeColor || "-"}
             </Descriptions.Item>
             <Descriptions.Item label="Species">
-              {data.person.species?.name || "-"}
+              {data?.person?.species?.name || "-"}
             </Descriptions.Item>
             <Descriptions.Item label="Homeworld">
-              {data.person.homeworld?.name || "-"}
+              {data?.person?.homeworld?.name || "-"}
             </Descriptions.Item>
             <Descriptions.Item label="Film Connections">
-              {data.person.filmConnection?.films.map(
+              {data?.person?.filmConnection?.films?.map(
                 (film: any, index: any) => <div key={index}>{film.title}</div>
               ) || "-"}
             </Descriptions.Item>

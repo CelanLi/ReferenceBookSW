@@ -2,6 +2,7 @@ import PeopleList from "../components/PeopleList";
 import { useQuery } from "@apollo/client";
 import { Button, Layout, Menu, theme } from "antd";
 import { HeartOutlined, HeartFilled } from "@ant-design/icons";
+import FavoriteList from "../components/FavoriteList";
 import Filters from "../components/Filters";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -9,9 +10,6 @@ import { FilterConditions } from "../type";
 import { PEOPLE_QUERY } from "../query";
 
 const { Header, Content, Footer, Sider } = Layout;
-
-// set queries
-const allDataDocument = PEOPLE_QUERY;
 
 function Home() {
   const {
@@ -44,7 +42,7 @@ function Home() {
 
   // get favorite list from local storage
   const favorites = useState<string[]>(
-    JSON.parse(localStorage.getItem("favorites") as string)
+    JSON.parse(localStorage.getItem("favorites") as string) || []
   )[0];
   console.log("favorites", favorites);
 
@@ -61,13 +59,12 @@ function Home() {
     });
   }, [searchParams]);
 
-  // fetch data from SWAPI
-  const { data, fetchMore, loading, error } = useQuery(allDataDocument, {
+  const { data, fetchMore, loading, error } = useQuery(PEOPLE_QUERY, {
     variables: { cursor: null, before: null, limit: 20 },
   });
 
+  // clear all conditions if data change
   useEffect(() => {
-    // clear all conditions if data change
     setFilterConditions({
       gender: "",
       eyeColor: [],
@@ -106,7 +103,7 @@ function Home() {
         },
       });
     }
-  }, [data, filterConditions]);
+  }, [data, filterConditions, favorites, FavoriteMode]);
 
   if (!filteredData) {
     return <p>Loading...</p>;
@@ -121,13 +118,17 @@ function Home() {
           {FavoriteMode ? (
             <div style={{ display: "flex", alignItems: "center" }}>
               <HeartFilled />
-              <p style={{ margin: "0 0 0 10px" }}>Favorite Only Mode</p>
+              <p style={{ margin: "0 0 0 10px" }}>
+                Click to Close Favorite Only Mode
+              </p>
             </div>
           ) : (
             <>
               <div style={{ display: "flex", alignItems: "center" }}>
                 <HeartOutlined />
-                <p style={{ margin: "0 0 0 10px" }}>Close Favorite Only Mode</p>
+                <p style={{ margin: "0 0 0 10px" }}>
+                  Click to Switch to Favorite Only Mode
+                </p>
               </div>
             </>
           )}
@@ -141,21 +142,30 @@ function Home() {
             borderRadius: borderRadiusLG,
           }}
         >
-          <Sider style={{ background: colorBgContainer }} width={200}>
-            <Filters
-              data={data}
-              loading={loading}
-              error={error}
-              setFilterConditions={setFilterConditions}
-            />
-          </Sider>
+          {FavoriteMode ? (
+            <></>
+          ) : (
+            <Sider style={{ background: colorBgContainer }} width={200}>
+              <Filters
+                data={data}
+                loading={loading}
+                error={error}
+                setFilterConditions={setFilterConditions}
+              />
+            </Sider>
+          )}
+
           <Content style={{ padding: "0 24px", minHeight: 280 }}>
-            <PeopleList
-              data={filteredData}
-              fetchMore={fetchMore}
-              loading={loading}
-              error={error}
-            />
+            {FavoriteMode ? (
+              <FavoriteList />
+            ) : (
+              <PeopleList
+                data={filteredData}
+                fetchMore={fetchMore}
+                loading={loading}
+                error={error}
+              />
+            )}
           </Content>
         </Layout>
       </Content>

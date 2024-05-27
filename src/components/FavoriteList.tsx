@@ -9,56 +9,24 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Node } from "../type";
 
-interface PeopleListProps {
-  data: any;
-  fetchMore: any;
-  loading: boolean;
-  error: any;
-}
-
-function PeopleList({ data, fetchMore, loading, error }: PeopleListProps) {
-  // set pagination states
-  const [pageCursors, setPageCursors] = useState<string[]>([]);
-  const [currentPage, setCurrentPage] = useState(0);
-
+function FavoriteList() {
   // set favorite states
   const [favorites, setFavorites] = useState<Node[]>(
     JSON.parse(localStorage.getItem("favorites") || "[]")
   );
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
-  // render data
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-  if (error) return <p>Error: {error.message}</p>;
+  // Calculate the index of the first and last item on the current page
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 
-  // fetch forward when curser changes
-  const onForward = () => {
-    setCurrentPage(currentPage + 1);
-    setPageCursors([...pageCursors, data.allPeople.pageInfo.endCursor]);
-    fetchMore({
-      variables: {
-        cursor: data.allPeople.pageInfo.endCursor,
-        limit: 10,
-      },
-    });
-  };
+  // Get the items for the current page
+  const currentItems = favorites.slice(indexOfFirstItem, indexOfLastItem);
 
-  // fetch backward when curser changes
-  const onBackward = () => {
-    if (currentPage > 0) {
-      const newCurrentPage = currentPage - 1;
-      setCurrentPage(newCurrentPage);
-      fetchMore({
-        variables: {
-          cursor: pageCursors[newCurrentPage - 1],
-          limit: 10,
-        },
-      });
-    }
-  };
+  // Calculate the total number of pages
+  const totalPages = Math.ceil(favorites.length / itemsPerPage);
 
-  // handle like button
   const markAsFavorite = (node: Node) => {
     // Get the current list of favorite characters
     let favorites = localStorage.getItem("favorites")
@@ -100,8 +68,8 @@ function PeopleList({ data, fetchMore, loading, error }: PeopleListProps) {
       <Divider style={{ borderWidth: 2 }} />
       <List
         itemLayout="horizontal"
-        dataSource={data.allPeople.edges}
-        renderItem={(edges: any) => (
+        dataSource={currentItems}
+        renderItem={(person: any) => (
           <List.Item>
             <List.Item.Meta
               description={
@@ -117,26 +85,21 @@ function PeopleList({ data, fetchMore, loading, error }: PeopleListProps) {
                   >
                     <Link
                       to={{
-                        pathname: `/people/${edges.node.id}`,
+                        pathname: `/people/${person.id}`,
                         search: location.search,
                       }}
                     >
-                      <p>{edges.node.name || "-"}</p>
+                      <p>{person.name || "-"}</p>
                     </Link>
-                    <p>{edges.node.height || "-"}</p>
+                    <p>{person.height || "-"}</p>
+                    <p>{(person.homeworld && person.homeworld.name) || "-"}</p>
+                    <p>{(person.species && person.species.name) || "-"}</p>
+                    <p>{person.gender || "-"}</p>
+                    <p>{person.eyeColor || "-"}</p>
                     <p>
-                      {(edges.node.homeworld && edges.node.homeworld.name) ||
-                        "-"}
-                    </p>
-                    <p>
-                      {(edges.node.species && edges.node.species.name) || "-"}
-                    </p>
-                    <p>{edges.node.gender || "-"}</p>
-                    <p>{edges.node.eyeColor || "-"}</p>
-                    <p>
-                      <Button onClick={() => markAsFavorite(edges.node)}>
+                      <Button onClick={() => markAsFavorite(person)}>
                         {favorites?.some(
-                          (favorite) => favorite.id === edges.node.id
+                          (favorite) => favorite.id === person.id
                         ) ? (
                           <HeartFilled />
                         ) : (
@@ -156,15 +119,15 @@ function PeopleList({ data, fetchMore, loading, error }: PeopleListProps) {
           style={{ marginRight: "10px" }}
           shape="circle"
           icon={<LeftOutlined />}
-          onClick={onBackward}
-          disabled={currentPage > 0 ? false : true}
+          onClick={() => setCurrentPage(currentPage - 1)}
+          disabled={currentPage === 1}
         />
         <Button
           style={{ marginLeft: "10px" }}
           shape="circle"
           icon={<RightOutlined />}
-          onClick={onForward}
-          disabled={data.allPeople.pageInfo.hasNextPage ? false : true}
+          onClick={() => setCurrentPage(currentPage + 1)}
+          disabled={currentPage === totalPages}
         />
         <br />
       </div>
@@ -172,4 +135,4 @@ function PeopleList({ data, fetchMore, loading, error }: PeopleListProps) {
   );
 }
 
-export default PeopleList;
+export default FavoriteList;
