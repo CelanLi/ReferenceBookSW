@@ -112,7 +112,16 @@ function Home() {
   return (
     <Layout style={{ width: "100%", minHeight: "100vh" }}>
       <Header style={{ display: "flex", alignItems: "center" }}>
-        <div className="demo-logo" />
+        <div
+          className="demo-logo"
+          style={{ display: "flex", alignItems: "center" }}
+        >
+          <img
+            src="/Star_Wars_Logo.png"
+            alt="Logo"
+            style={{ height: "50px" }}
+          />
+        </div>
         <Menu theme="dark" mode="horizontal" style={{ flex: 1, minWidth: 0 }} />
         <Button type="primary" onClick={toggleFavoriteMode}>
           {FavoriteMode ? (

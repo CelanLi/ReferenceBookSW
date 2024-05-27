@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { UserOutlined, EyeOutlined, RedditOutlined } from "@ant-design/icons";
+import {
+  UserOutlined,
+  EyeOutlined,
+  RedditOutlined,
+  ClearOutlined,
+} from "@ant-design/icons";
 import { Radio, Checkbox, List, Button } from "antd";
 import { FilterConditions } from "../type.ts";
 import { useSearchParams } from "react-router-dom";
@@ -123,9 +128,12 @@ function Filters({ data, loading, error }: FilterProps) {
 
   return (
     <>
-      <Button type="primary" onClick={clearFilters}>
-        Clear All Filters
-      </Button>
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <Button type="primary" onClick={clearFilters}>
+          <ClearOutlined />
+          Clear All Filters
+        </Button>
+      </div>
       <List
         style={{ width: "100%", padding: "10px" }}
         dataSource={filters}
