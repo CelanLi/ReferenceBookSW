@@ -1,6 +1,7 @@
 import PeopleList from "../components/PeopleList";
 import { useQuery, gql } from "@apollo/client";
-import { Layout, Menu, theme } from "antd";
+import { Button, Layout, Menu, theme } from "antd";
+import { HeartOutlined, HeartFilled } from "@ant-design/icons";
 import Filters from "../components/Filters";
 import { useEffect, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
@@ -35,16 +36,24 @@ function Home() {
   // });
   const [filterConditions, setFilterConditions] = useState<FilterConditions>({
     gender: initialGender,
-    film: initialFilm,
     eyeColor: initialEyeColor,
     species: initialSpecies,
   });
+
+  // set favorite status
+  const [FavoriteMode, setFavoriteMode] = useState(false);
+  const toggleFavoriteMode = () => {
+    setFavoriteMode(!FavoriteMode);
+  };
+  // get favorite list from local storage
+  const favorites = useState<string[]>(
+    JSON.parse(localStorage.getItem("favorites") as string)
+  );
 
   // if searchParams change, update filterConditions
   useEffect(() => {
     setFilterConditions({
       gender: searchParams.get("gender") || "",
-      film: searchParams.get("film") || "",
       eyeColor: searchParams.get("eyeColor")
         ? searchParams.get("eyeColor")!.split(",")
         : [],
@@ -98,7 +107,6 @@ function Home() {
     // clear all conditions if data change
     setFilterConditions({
       gender: "",
-      film: "",
       eyeColor: [],
       species: [],
     });
@@ -113,10 +121,6 @@ function Home() {
         ({ node }: { node: Node }) =>
           (!filterConditions.gender ||
             node.gender === filterConditions.gender) &&
-          (!filterConditions.film ||
-            node.filmConnection.films.some(
-              (film) => film.title === filterConditions.film
-            )) &&
           (filterConditions.eyeColor.length === 0 ||
             filterConditions.eyeColor.includes(node.eyeColor)) &&
           (filterConditions.species.length === 0 ||
@@ -143,6 +147,21 @@ function Home() {
       <Header style={{ display: "flex", alignItems: "center" }}>
         <div className="demo-logo" />
         <Menu theme="dark" mode="horizontal" style={{ flex: 1, minWidth: 0 }} />
+        <Button type="primary" onClick={toggleFavoriteMode}>
+          {FavoriteMode ? (
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <HeartFilled />
+              <p style={{ margin: "0 0 0 10px" }}>Favorite Only Mode</p>
+            </div>
+          ) : (
+            <>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <HeartOutlined />
+                <p style={{ margin: "0 0 0 10px" }}>Close Favorite Only Mode</p>
+              </div>
+            </>
+          )}
+        </Button>
       </Header>
       <Content style={{ padding: "20px 40px 0 48px" }}>
         <Layout

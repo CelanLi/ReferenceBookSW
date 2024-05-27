@@ -1,12 +1,5 @@
 import "./App.css";
-import Home from "./views/Home";
-import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloProvider,
-  useQuery,
-  gql,
-} from "@apollo/client";
+import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 import AppRoutes from "./Routes";
 
 const cache = new InMemoryCache({

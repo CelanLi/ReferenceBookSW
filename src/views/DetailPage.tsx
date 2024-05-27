@@ -1,7 +1,8 @@
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, gql } from "@apollo/client";
 import { Button, Layout, Menu } from "antd";
 import { Descriptions } from "antd";
+import { GET_PERSON } from "../query";
 
 const { Header, Content, Footer } = Layout;
 
@@ -9,29 +10,6 @@ function DetailPage() {
   // fetch people id from url
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-
-  const GET_PERSON = gql`
-    query GetPerson($id: ID!) {
-      person(id: $id) {
-        id
-        name
-        height
-        homeworld {
-          name
-        }
-        species {
-          name
-        }
-        gender
-        eyeColor
-        filmConnection {
-          films {
-            title
-          }
-        }
-      }
-    }
-  `;
 
   const { data, loading, error } = useQuery(GET_PERSON, {
     variables: { id },

@@ -27,7 +27,6 @@ export type Homeworld = {
 
 export type FilterConditions = {
     gender: string;
-    film: string;
     eyeColor: string[];
     species: string[];
   };

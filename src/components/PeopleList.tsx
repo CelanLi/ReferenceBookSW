@@ -1,5 +1,10 @@
 import { List, Divider, Button } from "antd";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import {
+  LeftOutlined,
+  RightOutlined,
+  HeartOutlined,
+  HeartFilled,
+} from "@ant-design/icons";
 import { Link } from "react-router-dom";
 
 import { useState } from "react";
@@ -14,6 +19,9 @@ interface PeopleListProps {
 function PeopleList({ data, fetchMore, loading, error }: PeopleListProps) {
   const [pageCursors, setPageCursors] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
+  const [favorites, setFavorites] = useState<string[]>(
+    JSON.parse(localStorage.getItem("favorites") as string)
+  );
 
   // render data
   if (loading) {
@@ -47,12 +55,44 @@ function PeopleList({ data, fetchMore, loading, error }: PeopleListProps) {
     }
   };
 
+  // handle like button
+  const markAsFavorite = (id: string) => {
+    console.log("aaa");
+    // Get the current list of favorite characters
+    const favorites = localStorage.getItem("favorites")
+      ? JSON.parse(localStorage.getItem("favorites") as string)
+      : [];
+
+    // if the character is already a favorite
+    if (favorites.includes(id)) {
+      // If the character is already a favorite, remove it from the list
+      const newFavorites = favorites.filter(
+        (favorite: string) => favorite !== id
+      );
+      // Save the updated list back to localStorage
+      localStorage.setItem("favorites", JSON.stringify(newFavorites));
+      // set favorites
+      setFavorites(newFavorites);
+    }
+    // if not, add to favorite
+    else {
+      // Add the new favorite character
+      favorites.push(id);
+      // Save the updated list back to localStorage
+      localStorage.setItem("favorites", JSON.stringify(favorites));
+      // set favorites
+      setFavorites(favorites);
+    }
+  };
+
+  // When a people is liked, the like button should be filled
+
   return (
     <>
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(6, 1fr) 2fr",
+          gridTemplateColumns: "repeat(7, 1fr)",
           gap: "10px",
           justifyItems: "center",
         }}
@@ -63,7 +103,7 @@ function PeopleList({ data, fetchMore, loading, error }: PeopleListProps) {
         <p>Species</p>
         <p>Gender</p>
         <p>Eye Color</p>
-        <p>Films</p>
+        <p>Like</p>
       </div>
       <Divider style={{ borderWidth: 2 }} />
       <List
@@ -77,7 +117,7 @@ function PeopleList({ data, fetchMore, loading, error }: PeopleListProps) {
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "repeat(6, 1fr) 2fr",
+                      gridTemplateColumns: "repeat(7, 1fr)",
                       gap: "10px",
                       justifyItems: "center",
                       alignItems: "center",
@@ -102,9 +142,13 @@ function PeopleList({ data, fetchMore, loading, error }: PeopleListProps) {
                     <p>{edges.node.gender || "-"}</p>
                     <p>{edges.node.eyeColor || "-"}</p>
                     <p>
-                      {edges.node.filmConnection.films.map((film: any) => (
-                        <p key={film.title}>- {film.title}</p>
-                      ))}
+                      <Button onClick={() => markAsFavorite(edges.node.id)}>
+                        {favorites?.includes(edges.node.id) ? (
+                          <HeartFilled />
+                        ) : (
+                          <HeartOutlined />
+                        )}
+                      </Button>
                     </p>
                   </div>
                 </>

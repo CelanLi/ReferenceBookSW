@@ -1,10 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  UserOutlined,
-  EyeOutlined,
-  RedditOutlined,
-  PlaySquareOutlined,
-} from "@ant-design/icons";
+import { UserOutlined, EyeOutlined, RedditOutlined } from "@ant-design/icons";
 import { Radio, Checkbox, List, Button } from "antd";
 import { FilterConditions } from "../type.ts";
 import { useSearchParams } from "react-router-dom";
@@ -20,7 +15,6 @@ function Filters({ data, loading, error }: FilterProps) {
   // set up states
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedGender, setSelectedGender] = useState("");
-  const [selectedFilm, setSelectedFilm] = useState("");
   const [selectedSpecies, setSelectedSpecies] = useState<string[]>([]);
   const [selectedEyeColor, setSelectedEyeColor] = useState<string[]>([]);
 
@@ -28,7 +22,6 @@ function Filters({ data, loading, error }: FilterProps) {
   const updateFilters = () => {
     setSearchParams({
       gender: selectedGender,
-      film: selectedFilm,
       species: selectedSpecies.join(","),
       eyeColor: selectedEyeColor.join(","),
     });
@@ -36,7 +29,7 @@ function Filters({ data, loading, error }: FilterProps) {
 
   useEffect(() => {
     updateFilters();
-  }, [selectedGender, selectedFilm, selectedSpecies, selectedEyeColor]);
+  }, [selectedGender, selectedSpecies, selectedEyeColor]);
 
   // render data
   if (loading) {
@@ -49,7 +42,6 @@ function Filters({ data, loading, error }: FilterProps) {
     // clear all conditions if data change
     setSelectedGender("");
     setSelectedEyeColor([]);
-    setSelectedFilm("");
     setSelectedSpecies([]);
   }, [data]);
 
@@ -110,27 +102,12 @@ function Filters({ data, loading, error }: FilterProps) {
         label: option,
       })),
     },
-    {
-      key: "film",
-      icon: <PlaySquareOutlined />,
-      label: "Film",
-      type: "radio",
-      children: filmOptions.map((option) => ({
-        key: option,
-        label: option,
-      })),
-    },
   ];
 
   // handle filters change
   const handleGenderChange = (e: any) => {
     const value = e.target.value;
     setSelectedGender(value);
-  };
-
-  const handleFilmChange = (e: any) => {
-    const value = e.target.value;
-    setSelectedFilm(value);
   };
 
   const handleEyeColorChange: (checkedValues: string[]) => void = (
@@ -157,7 +134,6 @@ function Filters({ data, loading, error }: FilterProps) {
 
   const clearFilters = () => {
     setSelectedGender("");
-    setSelectedFilm("");
     setSelectedEyeColor([]);
     setSelectedSpecies([]);
     // setFilterConditions({ gender: "", film: "", eyeColor: [], species: [] });
@@ -168,9 +144,9 @@ function Filters({ data, loading, error }: FilterProps) {
       {/* <Button type="primary" onClick={applyFilters}>
         Apply Filters
       </Button> */}
-      {/* <Button type="primary" onClick={clearFilters}>
+      <Button type="primary" onClick={clearFilters}>
         Clear All Filters
-      </Button> */}
+      </Button>
       <List
         style={{ width: "100%", padding: "10px" }}
         dataSource={filters}
@@ -185,41 +161,19 @@ function Filters({ data, loading, error }: FilterProps) {
               }
               description={
                 filter.type === "radio" ? (
-                  filter.key === "gender" ? (
-                    <Radio.Group
-                      value={selectedGender}
-                      onChange={handleGenderChange}
-                    >
-                      {filter.children.map(
-                        (child) =>
-                          child.key !== "Others" && (
-                            <div
-                              key={child.key}
-                              style={{ marginBottom: "10px" }}
-                            >
-                              <Radio value={child.key}>{child.label}</Radio>
-                            </div>
-                          )
-                      )}
-                    </Radio.Group>
-                  ) : (
-                    <Radio.Group
-                      value={selectedFilm}
-                      onChange={handleFilmChange}
-                    >
-                      {filter.children.map(
-                        (child) =>
-                          child.key !== "Others" && (
-                            <div
-                              key={child.key}
-                              style={{ marginBottom: "10px" }}
-                            >
-                              <Radio value={child.key}>{child.label}</Radio>
-                            </div>
-                          )
-                      )}
-                    </Radio.Group>
-                  )
+                  <Radio.Group
+                    value={selectedGender}
+                    onChange={handleGenderChange}
+                  >
+                    {filter.children.map(
+                      (child) =>
+                        child.key !== "Others" && (
+                          <div key={child.key} style={{ marginBottom: "10px" }}>
+                            <Radio value={child.key}>{child.label}</Radio>
+                          </div>
+                        )
+                    )}
+                  </Radio.Group>
                 ) : filter.type === "checkbox" ? (
                   filter.key === "eyecolor" ? (
                     <Checkbox.Group
