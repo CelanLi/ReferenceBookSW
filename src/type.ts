@@ -22,11 +22,27 @@ export type Homeworld = {
     species: Species;
     gender: string;
     eyeColor: string;
-    filmConnection: FilmConnection;
   };
 
 export type FilterConditions = {
-    gender: string;
+    gender: string | null;
     eyeColor: string[];
     species: string[];
+  };
+
+export type Person = {
+    __typename?: "Person" | undefined;
+    id: string;
+    name?: string | null | undefined;
+    height?: number | null | undefined;
+    gender?: string |null| undefined;
+    eyeColor?: string |null| undefined;
+    species?: { name: string } | null|undefined;
+    homeworld?: { name: string } | null|undefined;
+  } | null | undefined;
+
+  export type PeopleEdge = {
+    __typename?: "PeopleEdge" | undefined;
+    cursor: string;
+    node?: Person | null| undefined;
   };

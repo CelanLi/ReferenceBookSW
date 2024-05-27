@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useQuery, gql } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { Button, Layout, Menu } from "antd";
 import { Descriptions } from "antd";
 import { GET_PERSON } from "../query";
@@ -11,6 +11,7 @@ function DetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
+  // fetch people by id
   const { data, loading, error } = useQuery(GET_PERSON, {
     variables: { id },
   });

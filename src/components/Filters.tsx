@@ -62,14 +62,6 @@ function Filters({ data, loading, error }: FilterProps) {
     )
   ).map((option) => option || "Others") as string[];
 
-  const filmOptions = Array.from(
-    new Set(
-      data?.allPeople?.edges?.flatMap((edge: any) =>
-        edge.node.filmConnection.films?.map((film: any) => film.title)
-      ) ?? []
-    )
-  ).map((option) => option || "Others") as string[];
-
   // put options into filters
   const filters = [
     {

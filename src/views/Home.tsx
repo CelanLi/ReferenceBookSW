@@ -1,26 +1,27 @@
 import PeopleList from "../components/PeopleList";
-import { useQuery, gql } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { Button, Layout, Menu, theme } from "antd";
 import { HeartOutlined, HeartFilled } from "@ant-design/icons";
 import Filters from "../components/Filters";
 import { useEffect, useState } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
-import { FilterConditions, Node } from "../type";
+import { useSearchParams } from "react-router-dom";
+import { FilterConditions } from "../type";
+import { PEOPLE_QUERY } from "../query";
 
 const { Header, Content, Footer, Sider } = Layout;
+
+// set queries
+const allDataDocument = PEOPLE_QUERY;
 
 function Home() {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const location = useLocation();
-  // const filters = location.state?.searchParams || "";
-
+  // get search params
   const [searchParams] = useSearchParams();
 
   const initialGender = searchParams.get("gender") || "";
-  const initialFilm = searchParams.get("film") || "";
   const initialSpecies = searchParams.get("species")
     ? searchParams.get("species")!.split(",")
     : [];
@@ -28,12 +29,7 @@ function Home() {
     ? searchParams.get("eyeColor")!.split(",")
     : [];
 
-  // const [filterConditions, setFilterConditions] = useState<FilterConditions>({
-  //   gender: "",
-  //   film: "",
-  //   eyeColor: [],
-  //   species: [],
-  // });
+  // set filter conditions
   const [filterConditions, setFilterConditions] = useState<FilterConditions>({
     gender: initialGender,
     eyeColor: initialEyeColor,
@@ -45,10 +41,12 @@ function Home() {
   const toggleFavoriteMode = () => {
     setFavoriteMode(!FavoriteMode);
   };
+
   // get favorite list from local storage
   const favorites = useState<string[]>(
     JSON.parse(localStorage.getItem("favorites") as string)
-  );
+  )[0];
+  console.log("favorites", favorites);
 
   // if searchParams change, update filterConditions
   useEffect(() => {
@@ -64,43 +62,8 @@ function Home() {
   }, [searchParams]);
 
   // fetch data from SWAPI
-  const PEOPLE_QUERY = gql`
-    query GetData($cursor: String, $before: String) {
-      allPeople(first: 10, after: $cursor, before: $before) {
-        edges {
-          node {
-            id
-            name
-            height
-            homeworld {
-              name
-            }
-            species {
-              name
-            }
-            gender
-            eyeColor
-            filmConnection {
-              films {
-                title
-              }
-            }
-          }
-          cursor
-        }
-        pageInfo {
-          startCursor
-          endCursor
-          hasNextPage
-          hasPreviousPage
-        }
-      }
-    }
-  `;
-
-  // first data fetch
-  const { data, fetchMore, loading, error } = useQuery(PEOPLE_QUERY, {
-    variables: { cursor: null, before: null },
+  const { data, fetchMore, loading, error } = useQuery(allDataDocument, {
+    variables: { cursor: null, before: null, limit: 20 },
   });
 
   useEffect(() => {
@@ -112,27 +75,34 @@ function Home() {
     });
   }, [data]);
 
+  // filter data
   const [filteredData, setFilteredData] = useState(data);
   useEffect(() => {
     if (data) {
-      console.log(filterConditions.gender);
-      console.log("species", data.allPeople.edges[0].node.species);
-      const filtered = data.allPeople.edges.filter(
-        ({ node }: { node: Node }) =>
-          (!filterConditions.gender ||
-            node.gender === filterConditions.gender) &&
-          (filterConditions.eyeColor.length === 0 ||
-            filterConditions.eyeColor.includes(node.eyeColor)) &&
-          (filterConditions.species.length === 0 ||
-            filterConditions.species.includes(node.species?.name))
+      const filtered = data.allPeople?.edges?.filter((edge: any) =>
+        Boolean(
+          edge?.node &&
+            (!filterConditions.gender ||
+              edge.node.gender === filterConditions.gender) &&
+            (filterConditions.eyeColor.length === 0 ||
+              (edge.node.eyeColor &&
+                filterConditions.eyeColor.includes(edge.node.eyeColor))) &&
+            (filterConditions.species.length === 0 ||
+              (edge.node.species &&
+                filterConditions.species.includes(edge.node.species.name)))
+        )
       );
-
-      console.log(filtered);
 
       setFilteredData({
         allPeople: {
           edges: filtered,
-          pageInfo: data.allPeople.pageInfo,
+          pageInfo: data.allPeople?.pageInfo || {
+            __typename: "PageInfo",
+            startCursor: null,
+            endCursor: null,
+            hasNextPage: false,
+            hasPreviousPage: false,
+          },
         },
       });
     }

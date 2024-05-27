@@ -17,8 +17,11 @@ interface PeopleListProps {
 }
 
 function PeopleList({ data, fetchMore, loading, error }: PeopleListProps) {
+  // set pagination states
   const [pageCursors, setPageCursors] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
+
+  // set favorite states
   const [favorites, setFavorites] = useState<string[]>(
     JSON.parse(localStorage.getItem("favorites") as string)
   );
@@ -57,7 +60,6 @@ function PeopleList({ data, fetchMore, loading, error }: PeopleListProps) {
 
   // handle like button
   const markAsFavorite = (id: string) => {
-    console.log("aaa");
     // Get the current list of favorite characters
     const favorites = localStorage.getItem("favorites")
       ? JSON.parse(localStorage.getItem("favorites") as string)

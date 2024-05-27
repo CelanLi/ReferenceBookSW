@@ -1,7 +1,8 @@
 import { gql } from "@apollo/client";
+import { graphql } from "./gql/gql";
 
-// get people query for people list
-export const PEOPLE_QUERY = gql`
+// get people query
+export const PEOPLE_QUERY = graphql(`
   query GetData($limit: Int, $cursor: String, $before: String) {
     allPeople(first: $limit, after: $cursor, before: $before) {
       edges {
@@ -28,7 +29,7 @@ export const PEOPLE_QUERY = gql`
       }
     }
   }
-`;
+`);
 
 // get all species query
 export const SPECIES_QUERY = gql`
@@ -94,3 +95,27 @@ export const GET_PERSON = gql`
     }
   }
 `;
+
+// get people query for favorites
+// export const GET_FAVORITES = gql`
+//   query GetPeople($id: [ID!]!) {
+//     person(id: $id) {
+//       id
+//       name
+//       height
+//       homeworld {
+//         name
+//       }
+//       species {
+//         name
+//       }
+//       gender
+//       eyeColor
+//       filmConnection {
+//         films {
+//           title
+//         }
+//       }
+//     }
+//   }
+// `;
