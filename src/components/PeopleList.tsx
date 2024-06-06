@@ -1,26 +1,16 @@
 import { List, Divider, Button } from "antd";
-import {
-  LeftOutlined,
-  RightOutlined,
-  HeartOutlined,
-  HeartFilled,
-} from "@ant-design/icons";
+import { HeartOutlined, HeartFilled } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Node } from "../type";
 
 interface PeopleListProps {
   data: any;
-  fetchMore: any;
   loading: boolean;
   error: any;
 }
 
-function PeopleList({ data, fetchMore, loading, error }: PeopleListProps) {
-  // set pagination states
-  const [pageCursors, setPageCursors] = useState<string[]>([]);
-  const [currentPage, setCurrentPage] = useState(0);
-
+function PeopleList({ data, loading, error }: PeopleListProps) {
   // set favorite states
   const [favorites, setFavorites] = useState<Node[]>(
     JSON.parse(localStorage.getItem("favorites") || "[]")
@@ -31,32 +21,6 @@ function PeopleList({ data, fetchMore, loading, error }: PeopleListProps) {
     return <p>Loading...</p>;
   }
   if (error) return <p>Error: {error.message}</p>;
-
-  // fetch forward when curser changes
-  const onForward = () => {
-    setCurrentPage(currentPage + 1);
-    setPageCursors([...pageCursors, data.allPeople.pageInfo.endCursor]);
-    fetchMore({
-      variables: {
-        cursor: data.allPeople.pageInfo.endCursor,
-        limit: 10,
-      },
-    });
-  };
-
-  // fetch backward when curser changes
-  const onBackward = () => {
-    if (currentPage > 0) {
-      const newCurrentPage = currentPage - 1;
-      setCurrentPage(newCurrentPage);
-      fetchMore({
-        variables: {
-          cursor: pageCursors[newCurrentPage - 1],
-          limit: 10,
-        },
-      });
-    }
-  };
 
   // handle like button
   const markAsFavorite = (node: Node) => {
@@ -100,7 +64,7 @@ function PeopleList({ data, fetchMore, loading, error }: PeopleListProps) {
       <Divider style={{ borderWidth: 2 }} />
       <List
         itemLayout="horizontal"
-        dataSource={data.allPeople.edges}
+        dataSource={data}
         renderItem={(edges: any) => (
           <List.Item>
             <List.Item.Meta
@@ -151,23 +115,6 @@ function PeopleList({ data, fetchMore, loading, error }: PeopleListProps) {
           </List.Item>
         )}
       />
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <Button
-          style={{ marginRight: "10px" }}
-          shape="circle"
-          icon={<LeftOutlined />}
-          onClick={onBackward}
-          disabled={currentPage > 0 ? false : true}
-        />
-        <Button
-          style={{ marginLeft: "10px" }}
-          shape="circle"
-          icon={<RightOutlined />}
-          onClick={onForward}
-          disabled={data.allPeople.pageInfo.hasNextPage ? false : true}
-        />
-        <br />
-      </div>
     </>
   );
 }

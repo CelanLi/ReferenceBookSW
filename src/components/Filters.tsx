@@ -52,19 +52,15 @@ function Filters({ data, loading, error }: FilterProps) {
 
   // get options from data
   const genderOptions = Array.from(
-    new Set(data?.allPeople?.edges?.map((edge: any) => edge.node.gender)) ?? []
+    new Set(data.map((edge: any) => edge.node.gender)) ?? []
   ).map((option) => option || "Others") as string[];
 
   const eyeColorOptions = Array.from(
-    new Set(data?.allPeople?.edges?.map((edge: any) => edge.node.eyeColor)) ??
-      []
+    new Set(data.map((edge: any) => edge.node.eyeColor)) ?? []
   ).map((option) => option || "Others") as string[];
 
   const speciesOptions = Array.from(
-    new Set(
-      data?.allPeople?.edges?.flatMap((edge: any) => edge.node.species?.name) ??
-        []
-    )
+    new Set(data.flatMap((edge: any) => edge.node.species?.name) ?? [])
   ).map((option) => option || "Others") as string[];
 
   // put options into filters
